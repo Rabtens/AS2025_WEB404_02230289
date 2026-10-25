@@ -82,15 +82,15 @@ sequenceDiagram
     participant E as evil.html :4000 (attacker)
 
     V->>B: GET /account
-    B-->>V: Form embeds hidden _csrf = <32-byte random>
+    B-->>V: Form embeds hidden _csrf = 32-byte random
     Note over V,B: Token lives in the page (same-origin only)
 
     V->>E: Opens puppy page
     E-->>V: hidden form POSTs to :5000
     V->>B: POST /account/change-email (NO valid _csrf)
-    Note right of V: SameSite=Lax may block the cookie;<br/>even if sent, Origin != self AND token missing
+    Note right of V: SameSite=Lax may block the cookie,<br/>even if sent, Origin != self AND token missing
     B-->>B: Origin check ✗ / token compare ✗
-    B-->>V: 403 Forbidden — rejected 🛡️
+    B-->>V: 403 Forbidden, rejected
     Note over V,B: Legit same-origin form (correct token) still works → 200
 ```
 
