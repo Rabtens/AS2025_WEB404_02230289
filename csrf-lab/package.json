@@ -1,0 +1,17 @@
+{
+  "name": "csrf-lab",
+  "version": "1.0.0",
+  "description": "A self-contained teaching lab demonstrating a CSRF vulnerability, a working attack, and the synchronizer-token defense that stops it.",
+  "private": true,
+  "scripts": {
+    "start": "node vulnerable/server.js",
+    "vuln": "node vulnerable/server.js",
+    "secure": "node secure/server.js",
+    "attacker": "node attacker-server.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0"
+  }
+}

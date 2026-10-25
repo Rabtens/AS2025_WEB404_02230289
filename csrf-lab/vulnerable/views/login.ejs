@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DemoBank — Login (VULNERABLE)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 3rem auto; padding: 0 1rem; }
+    .banner { background:#fde68a; border:1px solid #f59e0b; padding:.5rem .75rem; border-radius:6px; font-size:.9rem; }
+    label { display:block; margin:.75rem 0 .25rem; }
+    input { width:100%; padding:.5rem; box-sizing:border-box; }
+    button { margin-top:1rem; padding:.5rem 1rem; }
+    .err { color:#b91c1c; }
+  </style>
+</head>
+<body>
+  <p class="banner">⚠️ VULNERABLE build — no CSRF protection. Teaching lab only.</p>
+  <h1>DemoBank Login</h1>
+  <% if (error) { %><p class="err"><%= error %></p><% } %>
+  <form method="POST" action="/login">
+    <label for="username">Username</label>
+    <input id="username" name="username" value="alice" autocomplete="username">
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" value="password123" autocomplete="current-password">
+    <button type="submit">Log in</button>
+  </form>
+  <p style="font-size:.85rem;color:#555">Demo account is pre-filled: <code>alice / password123</code></p>
+</body>
+</html>
